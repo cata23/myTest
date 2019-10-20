@@ -1,0 +1,37 @@
+Welcome to Naughts and Crosses! v1.0
+
+The game is very simple,
+Try to get 3 in a row
+
+Balance between blocking your opponent
+and playing offensive to win
+
+How to play:
+
+The board starts like this:
+
+- - -
+- - -
+- - -
+
+You enter your positions and they change
+
+for example:
+
+Player 1 inputs: 5
+
+The board changes to:
+
+- - -
+- X -
+- - -
+
+Player 2 inputs : 9
+
+- - -
+- X -
+- - 0
+
+Got it? Great!
+
+Lets begin:
