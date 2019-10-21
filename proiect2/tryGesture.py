@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 import time
-import smbus
+# here
+#import smbus
 
 # i2c address
 PAJ7620U2_I2C_ADDRESS = 0x73
@@ -172,7 +173,8 @@ Init_Gesture_Array = (
 class PAJ7620U2(object):
     def __init__(self, address=PAJ7620U2_I2C_ADDRESS):
         self._address = address
-        self._bus = smbus.SMBus(1)
+        # here
+        # self._bus = smbus.SMBus(1)
         time.sleep(0.5)
         if self._read_byte(0x00) == 0x20:
             print("\nGesture Sensor OK\n")
