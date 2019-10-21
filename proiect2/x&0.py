@@ -187,8 +187,8 @@ class gameClass(object):
     currentRow = 0
     currentCol = 0
     # hold the last position on the board
-    lastRow = None
-    lastCol = None
+    lastRow = 0
+    lastCol = 0
     # game is runnig or not
     runnig = 1
     # mode for windows (wight and height)
@@ -333,40 +333,38 @@ class gameClass(object):
     def drawPosition(self):
         red = (255, 0, 0)
         white = (255, 255, 255)
+        if self.lastRow is not None and self.lastCol is not None:
+            startPointXOld = (self.lastRow * 100)
+            startPointYOld = (self.lastCol * 100)
+            self.drawConture(startPointXOld, startPointYOld, white)
+            self.lastRow = self.currentRow
+            self.lastCol = self.currentCol
         if self.currentRow is not None and self.currentCol is not None:
             # determinate the square
             startPointXNew = (self.currentRow * 100)
             startPointYNew = (self.currentCol * 100)
             self.drawConture(startPointXNew, startPointYNew, red)
-        if self.lastRow is not None and self.lastCol is not None:
-            startPointXOld = (self.lastRow * 100)
-            startPointYOld = (self.lastCol * 100)
-            self.drawConture(startPointXOld, startPointYOld, white)
+
 
     def executeGestEvent(self, gest):
-        print("Something")
         if gest == PAJ_UP:
-            print("Up\r\n")
-            if 0 < self.currentRow < 3:
-                self.currentRow -= 1
-                self.drawPosition()
-
-        elif gest == PAJ_DOWN:
-            print("Down\r\n")
-            if 0 <= self.currentRow < 2:
-                self.currentRow += 1
-                self.drawPosition()
-
-        elif gest == PAJ_LEFT:
-            print("Left\r\n")
-            if 0 < self.currentCol <= 2:
+            if 0 < self.currentCol < 3:
                 self.currentCol -= 1
                 self.drawPosition()
 
-        elif gest == PAJ_RIGHT:
-            print("Right\r\n")
+        elif gest == PAJ_DOWN:
             if 0 <= self.currentCol < 2:
                 self.currentCol += 1
+                self.drawPosition()
+
+        elif gest == PAJ_LEFT:
+            if 0 < self.currentRow <= 2:
+                self.currentRow -= 1
+                self.drawPosition()
+
+        elif gest == PAJ_RIGHT:
+            if 0 <= self.currentRow < 2:
+                self.currentRow += 1
                 self.drawPosition()
 
         elif gest == PAJ_FORWARD:
