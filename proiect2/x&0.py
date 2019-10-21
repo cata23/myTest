@@ -182,23 +182,19 @@ class gameClass(object):
             [None, None, None],
             [None, None, None]]
     # exist or not a winner
-    winner = None
+    winner = XO
     # hold current position on the board
     currentRow = 0
     currentCol = 0
     # hold the last position on the board
-    lastRow = 0
-    lastCol = 0
+    lastRow = None
+    lastCol = None
     # game is runnig or not
     runnig = 1
     # mode for windows (wight and height)
     ttt = None
     # board to be displayed
     board = None
-    # gesture events
-    gestureEvents = [PAJ_UP, PAJ_DOWN, PAJ_LEFT,
-                     PAJ_RIGHT, PAJ_FORWARD, PAJ_BACKWARD,
-                     PAJ_CLOCKWISE, PAJ_COUNT_CLOCKWISE, PAJ_WAVE]
 
     def __init__(self):
         pygame.init()
@@ -230,7 +226,7 @@ class gameClass(object):
 
     # draw the status (i.e., player turn, etc) at the bottom of the board
     def drawStatus(self):
-        if self.winner in None:
+        if self.winner in "X":
             message = self.XO + "'s turn"
         else:
             message = self.winner + " won!"
@@ -259,13 +255,6 @@ class gameClass(object):
                 pygame.draw.line(self.board, (0, 0, 0), (centerX + 22, centerY - 22), \
                                  (centerX - 22, centerY + 22), 2)
 
-            # delete last position
-            # drawPosition(board, lastRow, lastCol, False)
-            # draw new position
-            # drawPosition(board, boardRow, boardCol, True)
-
-            # lastRow = boardRow
-            # lastCol = boardCol
             # mark the space as used
             self.grid[boardRow][boardCol] = piece
 
@@ -342,23 +331,54 @@ class gameClass(object):
     # enable - True  -> draw red square
     #        - False -> draw white square
     def drawPosition(self):
+        red = (255, 0, 0)
+        white = (255, 255, 255)
         if self.currentRow is not None and self.currentCol is not None:
             # determinate the square
             startPointXNew = (self.currentRow * 100)
             startPointYNew = (self.currentCol * 100)
-
-            startPointXOld = (self.currentRow * 100)
-            startPointYOld = (self.currentCol * 100)
-
-            red = (255, 0, 0)
-            white = (255, 255, 255)
-
             self.drawConture(startPointXNew, startPointYNew, red)
+        if self.lastRow is not None and self.lastCol is not None:
+            startPointXOld = (self.lastRow * 100)
+            startPointYOld = (self.lastCol * 100)
             self.drawConture(startPointXOld, startPointYOld, white)
 
     def executeGestEvent(self, gest):
         print("Something")
+        if gest == PAJ_UP:
+            print("Up\r\n")
+            if 0 < self.currentRow < 3:
+                self.currentRow -= 1
+                self.drawPosition()
 
+        elif gest == PAJ_DOWN:
+            print("Down\r\n")
+            if 0 <= self.currentRow < 2:
+                self.currentRow += 1
+                self.drawPosition()
+
+        elif gest == PAJ_LEFT:
+            print("Left\r\n")
+            if 0 < self.currentCol <= 2:
+                self.currentCol -= 1
+                self.drawPosition()
+
+        elif gest == PAJ_RIGHT:
+            print("Right\r\n")
+            if 0 <= self.currentCol < 2:
+                self.currentCol += 1
+                self.drawPosition()
+
+        elif gest == PAJ_FORWARD:
+            print("Forward\r\n")
+        elif gest == PAJ_BACKWARD:
+            print("Backward\r\n")
+        elif gest == PAJ_CLOCKWISE:
+            print("Clockwise\r\n")
+        elif gest == PAJ_COUNT_CLOCKWISE:
+            print("AntiClockwise\r\n")
+        elif gest == PAJ_WAVE:
+            print("Wave\r\n")
 
 if __name__ == '__main__':
     print("\nStart Test Program ...\n")
@@ -367,6 +387,9 @@ if __name__ == '__main__':
     game.initBoard()
     # init sensor
     # paj7620u2 = PAJ7620U2()
+    game.drawStatus()
+    # initial position
+    game.drawPosition()
     game.displayBoard()
     while game.runnig is 1:
         time.sleep(0.05)
@@ -378,4 +401,5 @@ if __name__ == '__main__':
         gesture = None
         if gesture is not None:
             game.executeGestEvent(gesture)
+            game.drawStatus()
             game.displayBoard()
