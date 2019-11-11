@@ -1,14 +1,15 @@
-#!/usr/bin/python
-# -*- coding:utf-8 -*-
+
 import time
 # here
 # import smbus
 import pygame
+import pygame.key
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! stuff about gesture sensor !!!!!!!!!!!!!!!!!!!!!!!!!!!
 # i2c address
 from builtins import object
 
+from pygame import pygame_dir
 from pygame.constants import QUIT
 
 PAJ7620U2_I2C_ADDRESS = 0x73
@@ -182,7 +183,7 @@ class gameClass(object):
             [None, None, None],
             [None, None, None]]
     # exist or not a winner
-    winner = XO
+    winner = None
     # hold current position on the board
     currentRow = 0
     currentCol = 0
@@ -195,11 +196,27 @@ class gameClass(object):
     ttt = None
     # board to be displayed
     board = None
+    # image
+    image = None
+    # cropped images
+    mapImage = []
 
     def __init__(self):
         pygame.init()
         self.ttt = pygame.display.set_mode((300, 400))
         pygame.display.set_caption('X & 0')
+        self.image = pygame.image.load("first.jpeg").convert()
+        self.image = pygame.transform.scale(self.image, (300, 300))
+        for i in range(0, 3):
+            for j in range(0, 3):
+                self.mapImage.append(
+                    self.image.subsurface(pygame.Rect((i * 100, j * 100), ((i + 1) * 100, (j + 1) * 100))))
+            #self.mapImage.append(self.image.subsurface(pygame.Rect((i * 100, i * 100), ((i+1) * 100, (i+1)*100))))
+
+
+
+        #self.image = self.image.subsurface(pygame.Rect((0, 0), (100, 100)))
+
 
     def initBoard(self):
         # set up the background surface
@@ -222,14 +239,19 @@ class gameClass(object):
 
     def displayBoard(self):
         self.ttt.blit(self.board, (0, 0))
+        # insert images
+        self.ttt.blit(self.image, (0, 0))
         pygame.display.flip()
 
     # draw the status (i.e., player turn, etc) at the bottom of the board
     def drawStatus(self):
-        if self.winner in "X":
+        if self.XO in "X":
             message = self.XO + "'s turn"
         else:
-            message = self.winner + " won!"
+            message = self.XO + "'s turn"
+
+        if self.winner is not None:
+            message = self.XO + " WON"
 
         # render the status message
         font = pygame.font.Font(None, 24)
@@ -241,10 +263,11 @@ class gameClass(object):
 
     # draw X or 0 (piece) on the board in boardRaw, boardCol
     def drawMove(self, boardRow, boardCol, piece):
+        print("drawMove")
         if self.winner is None:
             # determine the center of the square
-            centerX = (boardCol * 100) + 50
-            centerY = (boardRow * 100) + 50
+            centerX = (boardRow * 100) + 50
+            centerY = (boardCol * 100) + 50
 
             # draw the appropriate piece
             if piece == 'O':
@@ -260,6 +283,7 @@ class gameClass(object):
 
     # verify if "click" is possible
     def clickBoard(self):
+        print("clickBoard")
         if self.grid[self.currentRow][self.currentCol] is "X" or \
                 self.grid[self.currentRow][self.currentCol] is "O":
             return
@@ -267,11 +291,17 @@ class gameClass(object):
         # draw "X" or "0" on the board in current position
         self.drawMove(self.currentRow, self.currentCol, self.XO)
 
+        # check if someone win
+        self.gameWon()
+
         # go to next payer
-        if self.XO is "X":
-            self.XO = "O"
+        if self.winner is None:
+            if self.XO is "X":
+                self.XO = "O"
+            else:
+                self.XO = "X"
         else:
-            self.XO = "X"
+            self.drawStatus()
 
     # determine if anyone has won the game
     def gameWon(self):
@@ -282,7 +312,7 @@ class gameClass(object):
                 # this row won
                 self.winner = self.grid[row][0]
                 pygame.draw.line(self.board, (250, 0, 0), (0, (row + 1) * 100 - 50), \
-                                 (300, (row + 1) * 100 - 50), 2)
+                                 (0, (row + 1) * 100 - 50), 2)
                 break
 
         # check for winning columns
@@ -292,7 +322,7 @@ class gameClass(object):
                 # this column won
                 self.winner = self.grid[0][col]
                 pygame.draw.line(self.board, (250, 0, 0), ((col + 1) * 100 - 50, 0),
-                                 ((col + 1) * 100 - 50, 300), 2)
+                                 ((col + 1) * 100 - 50, 0), 2)
                 break
 
         # check for diagonal winners
@@ -326,10 +356,6 @@ class gameClass(object):
                          (startPointX + 2, startPointY + 100 - 2),
                          (startPointX + 100 - 2, startPointY + 100 - 2), 2)
 
-    # draw new position
-    # delete last position
-    # enable - True  -> draw red square
-    #        - False -> draw white square
     def drawPosition(self):
         red = (255, 0, 0)
         white = (255, 255, 255)
@@ -368,7 +394,8 @@ class gameClass(object):
                 self.drawPosition()
 
         elif gest == PAJ_FORWARD:
-            print("Forward\r\n")
+            self.clickBoard()
+
         elif gest == PAJ_BACKWARD:
             print("Backward\r\n")
         elif gest == PAJ_CLOCKWISE:
@@ -394,6 +421,24 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type is QUIT:
                 game.runnig = 0
+            if event.type is pygame.KEYDOWN:
+                var = None
+                if event.key == pygame.K_DOWN:
+                    var = PAJ_DOWN
+                elif event.key == pygame.K_UP:
+                    var = PAJ_UP
+                elif event.key == pygame.K_LEFT:
+                    var = PAJ_LEFT
+                elif event.key == pygame.K_RIGHT:
+                    var = PAJ_RIGHT
+                elif event.key == pygame.K_SPACE:
+                    # case for place a pice
+                    var = PAJ_FORWARD
+
+                game.executeGestEvent(var)
+                game.drawStatus()
+                game.displayBoard()
+
         # get gesture
         # gesture = paj7620u2.check_gesture()
         gesture = None
